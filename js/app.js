@@ -213,8 +213,9 @@
   }
 
   // ---------- render
-  function table(heads, rows, numCols) {
-    var wrap = el('div', 'table-scroll'), t = el('table', 'rank-table'), hr = el('tr');
+  function table(heads, rows, numCols, widths) {
+    var wrap = el('div', 'table-scroll'), t = el('table', 'rank-table fixed'), hr = el('tr');
+    if (widths) { var cg = el('colgroup'); widths.forEach(function (w) { var c = el('col'); c.style.width = w + '%'; cg.appendChild(c); }); t.appendChild(cg); }
     heads.forEach(function (h) { hr.appendChild(el('th', null, h)); }); var th = el('thead'); th.appendChild(hr); t.appendChild(th);
     var tb = el('tbody'); rows.forEach(function (r) { var tr = el('tr'); r.forEach(function (c, i) { tr.appendChild(el('td', (numCols || []).indexOf(i) >= 0 ? 'num' : null, c == null ? '' : String(c))); }); tb.appendChild(tr); }); t.appendChild(tb); wrap.appendChild(t); return wrap;
   }
@@ -242,7 +243,7 @@
       var tot = F.roles.rows.length, fa = F.roles.rows.filter(function (r) { return r.cls === 'Full automation'; }).length, au = F.roles.rows.filter(function (r) { return r.cls === 'Augmentation'; }).length;
       rows.push(['All groups', '', tot, fa, au, tot - fa - au, tot ? Math.round((fa + au) / tot * 100) + '%' : '']);
       var s = section('Where AI applies', 'From the AI Roles Assessment: the activities you put in scope, by role group.');
-      s.appendChild(table(['Group', 'Roles', 'Activities', 'Full automation', 'Augmentation', 'Human only', 'Suited to AI'], rows, [1, 2, 3, 4, 5, 6])); host.appendChild(s);
+      s.appendChild(table(['Group', 'Roles', 'Activities', 'Full automation', 'Augmentation', 'Human only', 'Suited to AI'], rows, [1, 2, 3, 4, 5, 6], [26, 9, 12, 17, 15, 11, 10])); host.appendChild(s);
     }
 
     if (F.workflow) {
@@ -253,7 +254,7 @@
         s2.appendChild(table(['Workflow', 'ID', 'Priority', 'Group', wv[0] === 'fix' ? 'Held up by' : 'Capabilities to watch'], list.map(function (x) {
           var by = wv[0] === 'fix' ? x.weak.map(function (b) { return b.id; }) : x.blockers.map(function (b) { return b.id + ' (' + statusText(b.status) + ')'; });
           return [x.w.name + (x.w.own ? ' (your own)' : ''), x.w.id, x.w.quad === 'prohibited' ? '–' : x.w.priority, REF.quadrants[x.w.quad], by.length ? by.join(', ') : (wv[0] === 'fix' ? 'Low feasibility, no capability gap flagged' : 'None flagged')];
-        }), [2]));
+        }), [2], [32, 8, 9, 14, 37]));
       });
       host.appendChild(s2);
     }
@@ -261,7 +262,7 @@
     if (F.capability || C.foundations.length) {
       var s3 = section('Foundations to fix first', 'Weak capabilities that hold up workflows, earliest journey-map phase first.');
       if (!C.foundations.length) s3.appendChild(el('p', null, F.capability ? 'No workflow is held up by a weak capability.' : 'Load a capability file to see this.'));
-      else s3.appendChild(table(['Capability', 'Phase', 'Your score', 'Holds up'], C.foundations.map(function (f) { return [f.cap.id + ' ' + f.cap.name, REF.phases[f.cap.phase], F.capability.scores[f.cap.id], f.wfs.map(function (w) { return w.name; }).slice(0, 3).join('; ') + (f.wfs.length > 3 ? '; and ' + (f.wfs.length - 3) + ' more' : '')]; }), [2]));
+      else s3.appendChild(table(['Capability', 'Phase', 'Your score', 'Holds up'], C.foundations.map(function (f) { return [f.cap.id + ' ' + f.cap.name, REF.phases[f.cap.phase], F.capability.scores[f.cap.id], f.wfs.map(function (w) { return w.name; }).slice(0, 3).join('; ') + (f.wfs.length > 3 ? '; and ' + (f.wfs.length - 3) + ' more' : '')]; }), [2], [32, 12, 10, 46]));
       if (C.checks.length) { s3.appendChild(el('p', 'hint', 'Not yet scored, but needed by workflows you could start: ' + C.checks.map(function (c) { return c.id + ' ' + c.name; }).join('; ') + '. Score them before you build.')); }
       host.appendChild(s3);
     }
@@ -270,11 +271,11 @@
       var s4 = section('Skills to build', 'Skill domains link to the foundation capabilities by category. The link is the author’s judgement.');
       if (C.domains) {
         s4.appendChild(el('h3', null, 'AI Skills Assessment (' + plural(F.skills.length, 'response', 'responses') + ')'));
-        s4.appendChild(table(['Domain', 'ID', 'Average (0 to 4)', 'Gap', 'Needed for foundations'], C.domains.map(function (d) { return [d.d.name, d.d.id, round1(d.avg).toFixed(1), d.gap ? 'Yes' : '', d.by.join(', ')]; }), [2]));
+        s4.appendChild(table(['Domain', 'ID', 'Average (0 to 4)', 'Gap', 'Needed for foundations'], C.domains.map(function (d) { return [d.d.name, d.d.id, round1(d.avg).toFixed(1), d.gap ? 'Yes' : '', d.by.join(', ')]; }), [2], [34, 9, 15, 9, 33]));
       }
       if (C.mapGaps) {
         s4.appendChild(el('h3', null, 'Marketing Skills Map'));
-        s4.appendChild(table(['Rank', 'Skill', 'ID', 'Coverage (0 to 10)', 'Gap'], C.mapGaps.map(function (x) { return [x.r.rank, x.r.tag, x.r.id, x.r.cov, x.gap ? 'Important, low coverage' : '']; }), [0, 3]));
+        s4.appendChild(table(['Rank', 'Skill', 'ID', 'Coverage (0 to 10)', 'Gap'], C.mapGaps.map(function (x) { return [x.r.rank, x.r.tag, x.r.id, x.r.cov, x.gap ? 'Important, low coverage' : '']; }), [0, 3], [9, 31, 9, 17, 34]));
       }
       host.appendChild(s4);
     }
