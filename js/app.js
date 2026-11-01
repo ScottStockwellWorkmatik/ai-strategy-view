@@ -248,6 +248,7 @@
 
     if (F.workflow) {
       var s2 = section('Suggested sequence', 'Built from workflow priority and capability readiness. The rules are on the Rules tab.');
+      s2.appendChild(el('p', 'hint', 'Priority is a score from 0 to 100 from the AI Workflow Assessment: value multiplied by feasibility, reduced by 10% for each point of risk above 1. Higher means more valuable, easier and lower risk. It orders workflows within each group; it is a ranking within your own workflows, not a benchmark. The formula is the author\u2019s draft judgement.'));
       WAVES.forEach(function (wv) {
         var list = C.workflows.filter(function (x) { return x.wave === wv[0]; }); if (!list.length) return;
         s2.appendChild(el('h3', null, wv[1] + ' (' + list.length + ')'));
